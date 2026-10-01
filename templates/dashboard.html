@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}My Daily Dashboard · NutriHealth{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <span class="eyebrow">{{ today }}</span>
+    <h1>My Daily Dashboard</h1>
+    <p class="muted">Hi, {{ user['username'] }} — here's your full picture for today.</p>
+  </div>
+  <a href="{{ url_for('log_food') }}" class="btn btn-primary">+ Log Food</a>
+</div>
+
+<div class="dashboard-grid">
+
+  <!-- Wellness score card -->
+  <section class="card wellness-card">
+    <h2>Calculated Wellness Score</h2>
+    <div class="score-ring" style="--pct: {{ wellness_score }};">
+      <div class="score-ring-inner">
+        <strong>{{ wellness_score }}</strong>
+        <span>out of 100</span>
+      </div>
+    </div>
+    <p class="muted small center">Blends today's calories, hydration, and steps into one number.</p>
+  </section>
+
+  <!-- Calorie summary card -->
+  <section class="card calorie-card">
+    <h2>Calories Today</h2>
+    <div class="calorie-ring" style="--pct: {{ calorie_progress_pct }};">
+      <div class="calorie-ring-inner">
+        <strong>{{ total_calories }}</strong>
+        <span>of {{ calorie_goal }} kcal</span>
+      </div>
+    </div>
+    <p class="calorie-remaining">
+      {% if total_calories >= calorie_goal %}
+        Goal reached for today.
+      {% else %}
+        <strong>{{ remaining_calories }}</strong> kcal remaining
+      {% endif %}
+    </p>
+  </section>
+
+  <!-- Macro breakdown card -->
+  <section class="card macro-card">
+    <h2>Macronutrient Breakdown</h2>
+
+    <div class="macro-row">
+      <div class="macro-label"><span class="dot dot-protein"></span> Protein</div>
+      <div class="macro-bar-track"><div class="macro-bar-fill fill-protein" style="width: {{ protein_pct }}%;"></div></div>
+      <div class="macro-value">{{ total_protein }}g</div>
+    </div>
+
+    <div class="macro-row">
+      <div class="macro-label"><span class="dot dot-carbs"></span> Carbs</div>
+      <div class="macro-bar-track"><div class="macro-bar-fill fill-carbs" style="width: {{ carbs_pct }}%;"></div></div>
+      <div class="macro-value">{{ total_carbs }}g</div>
+    </div>
+
+    <div class="macro-row">
+      <div class="macro-label"><span class="dot dot-fats"></span> Fats</div>
+      <div class="macro-bar-track"><div class="macro-bar-fill fill-fats" style="width: {{ fats_pct }}%;"></div></div>
+      <div class="macro-value">{{ total_fats }}g</div>
+    </div>
+  </section>
+
+  <!-- Hydration tracker -->
+  <section class="card hydration-card">
+    <h2>Hydration Tracker</h2>
+    <div class="glass-row">
+      {% for i in range(water_goal) %}
+        <span class="glass-icon {{ 'filled' if i < water_glasses else '' }}">💧</span>
+      {% endfor %}
+    </div>
+    <p class="tracker-count">{{ water_glasses }} / {{ water_goal }} glasses</p>
+    <div class="tracker-buttons">
+      <form method="POST" action="{{ url_for('update_hydration') }}">
+        <input type="hidden" name="action" value="remove">
+        <button type="submit" class="btn btn-outline" {{ 'disabled' if water_glasses <= 0 }}>&minus; Remove</button>
+      </form>
+      <form method="POST" action="{{ url_for('update_hydration') }}">
+        <input type="hidden" name="action" value="add">
+        <button type="submit" class="btn btn-primary">+ Add Glass</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Daily activity / steps -->
+  <section class="card activity-card">
+    <h2>Daily Activity</h2>
+    <p class="tracker-count">{{ "{:,}".format(steps) }} <span class="muted">/ {{ "{:,}".format(steps_goal) }} steps</span></p>
+    <div class="macro-bar-track tall">
+      <div class="macro-bar-fill fill-steps" style="width: {{ steps_pct }}%;"></div>
+    </div>
+    <p class="muted small">Steps Goal: {{ "{:,}".format(steps_goal) }}</p>
+    <div class="tracker-buttons">
+      <form method="POST" action="{{ url_for('add_steps') }}">
+        <input type="hidden" name="amount" value="500">
+        <button type="submit" class="btn btn-outline">+500</button>
+      </form>
+      <form method="POST" action="{{ url_for('add_steps') }}">
+        <input type="hidden" name="amount" value="1000">
+        <button type="submit" class="btn btn-outline">+1,000</button>
+      </form>
+      <form method="POST" action="{{ url_for('add_steps') }}">
+        <input type="hidden" name="amount" value="2000">
+        <button type="submit" class="btn btn-outline">+2,000</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Quick-add verified foods -->
+  <section class="card quickadd-card">
+    <h2>Quick-Add Verified Foods</h2>
+    <p class="muted small">Nutrition values verified from standard references — one tap to log.</p>
+    <div class="quickadd-grid">
+      {% for food in quick_add_foods %}
+      <form method="POST" action="{{ url_for('quick_add_food') }}" class="quickadd-item">
+        <input type="hidden" name="food_key" value="{{ food.key }}">
+        <button type="submit">
+          <strong>{{ food.name }}</strong>
+          <span>{{ food.calories }} kcal</span>
+        </button>
+      </form>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Recent food log -->
+  <section class="card recent-card full-width">
+    <div class="card-heading-row">
+      <h2>Recent Food Log</h2>
+      <a href="{{ url_for('food_history') }}" class="link-arrow">View all →</a>
+    </div>
+
+    {% if recent_logs %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Meal</th>
+          <th>Food</th>
+          <th>Calories</th>
+          <th>P / C / F</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr>
+          <td>{{ log['log_date'] }}</td>
+          <td><span class="tag tag-{{ log['meal_type']|lower }}">{{ log['meal_type'] }}</span></td>
+          <td>{{ log['food_name'] }}</td>
+          <td>{{ log['calories'] }} kcal</td>
+          <td>{{ log['protein']|round|int }}g / {{ log['carbs']|round|int }}g / {{ log['fats']|round|int }}g</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty-state">No meals logged yet. <a href="{{ url_for('log_food') }}">Log your first meal</a>.</p>
+    {% endif %}
+  </section>
+
+  <!-- Interactive community preview -->
+  <section class="card community-preview-card full-width">
+    <div class="card-heading-row">
+      <div>
+        <h2>Interactive Community</h2>
+        <p class="muted small">Healthy habits are better together. Post updates, share achievements, and engage with member challenges.</p>
+      </div>
+      <a href="{{ url_for('community') }}" class="link-arrow">Go to Community →</a>
+    </div>
+
+    {% if community_preview %}
+      <ul class="post-preview-list">
+        {% for post in community_preview %}
+        <li>
+          <span class="tag tag-{{ post['tag'] }}">{{ post['tag']|capitalize }}</span>
+          <strong>{{ post['author'] }}</strong>
+          <span class="muted">{{ post['content'] }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">No posts yet. <a href="{{ url_for('community') }}">Be the first to share something</a>.</p>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

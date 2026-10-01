@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Log Food · NutriHealth{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">NUTRITION</span>
+      <h1>Log a Meal</h1>
+      <p class="muted">Enter the food details below. Calories are required; macros are optional.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form method="POST" action="{{ url_for('log_food') }}" id="logFoodForm" novalidate>
+
+      <div class="field food-search-field">
+        <label for="food_name">Food Name</label>
+        <input type="text" id="food_name" name="food_name" placeholder="Start typing, e.g. banana, roti, chicken..." autocomplete="off" required>
+        <div class="food-suggestions" id="foodSuggestions" hidden></div>
+        <p class="hint" id="foodMatchHint"></p>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="meal_type">Meal Type</label>
+          <select id="meal_type" name="meal_type" required>
+            <option value="" disabled selected>Choose one</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Snack">Snack</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="log_date">Date</label>
+          <input type="date" id="log_date" name="log_date" value="{{ today }}" required>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="calories">Calories (kcal)</label>
+          <input type="number" id="calories" name="calories" min="0" required>
+        </div>
+        <div class="field">
+          <label for="protein">Protein (g)</label>
+          <input type="number" id="protein" name="protein" min="0" step="0.1">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="carbs">Carbs (g)</label>
+          <input type="number" id="carbs" name="carbs" min="0" step="0.1">
+        </div>
+        <div class="field">
+          <label for="fats">Fats (g)</label>
+          <input type="number" id="fats" name="fats" min="0" step="0.1">
+        </div>
+      </div>
+
+      <p class="hint" id="calorieEstimateHint"></p>
+
+      <button type="submit" class="btn btn-primary btn-block">Save to Log</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

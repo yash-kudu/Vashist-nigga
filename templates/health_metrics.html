@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Health Metrics · NutriHealth{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <span class="eyebrow">BODY METRICS</span>
+    <h1>Health Metrics</h1>
+    <p class="muted">Log your weight and height to track BMI over time.</p>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="card">
+    <h2>Add an Entry</h2>
+    <form method="POST" action="{{ url_for('health_metrics') }}" id="metricsForm" novalidate>
+      <div class="field-row">
+        <div class="field">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" id="weight" name="weight" min="20" max="300" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="height">Height (cm)</label>
+          <input type="number" id="height" name="height" min="80" max="250" step="0.1" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="log_date">Date</label>
+        <input type="date" id="log_date" name="log_date" value="{{ today }}" required>
+      </div>
+
+      <p class="hint" id="bmiPreview"></p>
+
+      <button type="submit" class="btn btn-primary btn-block">Save Entry</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>BMI Reference</h2>
+    <ul class="bmi-reference">
+      <li><span class="dot dot-info"></span> Below 18.5 &mdash; Underweight</li>
+      <li><span class="dot dot-success"></span> 18.5 &ndash; 24.9 &mdash; Normal weight</li>
+      <li><span class="dot dot-warning"></span> 25.0 &ndash; 29.9 &mdash; Overweight</li>
+      <li><span class="dot dot-danger"></span> 30.0 and above &mdash; Obese</li>
+    </ul>
+    <p class="muted small">BMI is a general screening measure and does not account for muscle mass, age, or body composition.</p>
+  </section>
+
+  <section class="card full-width">
+    <h2>History</h2>
+    {% if history %}
+    <table class="data-table">
+      <thead>
+        <tr><th>Date</th><th>Weight</th><th>Height</th><th>BMI</th></tr>
+      </thead>
+      <tbody>
+        {% for entry in history %}
+        <tr>
+          <td>{{ entry['log_date'] }}</td>
+          <td>{{ entry['weight_kg'] }} kg</td>
+          <td>{{ entry['height_cm'] }} cm</td>
+          <td>{{ entry['bmi'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty-state">No health metrics logged yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Log In · NutriHealth{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <span class="eyebrow">WELCOME BACK</span>
+    <h1>Log In to NutriHealth</h1>
+    <p class="muted">Track your meals, hydration, and health metrics day by day.</p>
+
+    <form method="POST" action="{{ url_for('login') }}" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ username or '' }}" required autofocus>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Log In</button>
+    </form>
+
+    <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}

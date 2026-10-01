@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Profile · NutriHealth{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <span class="eyebrow">ACCOUNT</span>
+    <h1>Your Profile</h1>
+    <p class="muted">Manage your account details and daily calorie target.</p>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="card">
+    <h2>Account Info</h2>
+    <ul class="stat-list">
+      <li><span>Username</span><strong>{{ user['username'] }}</strong></li>
+      <li><span>Email</span><strong>{{ user['email'] }}</strong></li>
+      <li><span>Member since</span><strong>{{ user['created_at'].split(' ')[0] }}</strong></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Daily Calorie Goal</h2>
+    <form method="POST" action="{{ url_for('profile') }}" novalidate>
+      <div class="field">
+        <label for="calorie_goal">Target (kcal per day)</label>
+        <input type="number" id="calorie_goal" name="calorie_goal" min="1000" max="6000"
+               value="{{ user['calorie_goal'] }}" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

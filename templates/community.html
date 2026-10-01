@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Community · NutriHealth{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <div>
+    <span class="eyebrow">INTERACTIVE COMMUNITY</span>
+    <h1>Healthy Habits Are Better Together</h1>
+    <p class="muted">Post updates, share achievements, and engage with member challenges.</p>
+  </div>
+</div>
+
+<div class="community-grid">
+
+  <div class="community-main">
+
+    <!-- New post form -->
+    <section class="card">
+      <h2>Share an Update</h2>
+      <form method="POST" action="{{ url_for('community_post') }}">
+        <div class="field">
+          <label for="content">What's on your mind?</label>
+          <textarea id="content" name="content" rows="3" placeholder="Share a win, a tip, or a question..." required></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="tag">Category</label>
+            <select id="tag" name="tag">
+              <option value="general">General</option>
+              <option value="challenge">Challenge Update</option>
+            </select>
+          </div>
+          <div class="field post-submit-field">
+            <button type="submit" class="btn btn-primary btn-block">Post</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filter tabs -->
+    <div class="feed-tabs">
+      <a href="{{ url_for('community', filter='all') }}" class="feed-tab {{ 'active' if filter_tag != 'challenge' }}">All Discussions</a>
+      <a href="{{ url_for('community', filter='challenge') }}" class="feed-tab {{ 'active' if filter_tag == 'challenge' }}">Challenges</a>
+    </div>
+
+    <!-- Feed -->
+    <section class="card full-width">
+      {% if posts %}
+        <ul class="post-list">
+          {% for post in posts %}
+          <li class="post-item">
+            <div class="post-head">
+              <strong>{{ post['author'] }}</strong>
+              <span class="tag tag-{{ post['tag'] }}">{{ post['tag']|capitalize }}</span>
+            </div>
+            <p class="post-content">{{ post['content'] }}</p>
+            <div class="post-foot">
+              <span class="muted small">{{ post['created_at'] }}</span>
+              <form method="POST" action="{{ url_for('like_post', post_id=post['id']) }}">
+                <button type="submit" class="btn-like">👍 {{ post['likes'] }}</button>
+              </form>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-state">No posts in this category yet. Be the first to share something.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="community-sidebar">
+    <section class="card">
+      <div class="card-heading-row">
+        <h2>Active Challenges</h2>
+        <span class="badge-autosync">Auto-Sync</span>
+      </div>
+      <p class="muted small">Progress updates automatically from what you log — no manual check-ins needed.</p>
+
+      {% for challenge in challenges %}
+      <div class="challenge-block">
+        <div class="challenge-head">
+          <strong>{{ challenge.title }}</strong>
+          <span class="muted small">{{ challenge.current }} / {{ challenge.target }} {{ challenge.unit }}</span>
+        </div>
+        <p class="muted small">{{ challenge.description }}</p>
+        <div class="macro-bar-track">
+          <div class="macro-bar-fill fill-challenge" style="width: {{ challenge.pct }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </section>
+  </aside>
+
+</div>
+{% endblock %}

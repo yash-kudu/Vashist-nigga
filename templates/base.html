@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NutriHealth{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrapper header-inner">
+      <a class="logo" href="{{ url_for('dashboard') if session.get('user_id') else url_for('login') }}">
+        NutriHealth
+      </a>
+
+      {% if session.get('user_id') %}
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('log_food') }}">Log Food</a>
+          <a href="{{ url_for('food_history') }}">History</a>
+          <a href="{{ url_for('health_metrics') }}">Health Metrics</a>
+          <a href="{{ url_for('community') }}">Community</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('logout') }}" class="nav-logout">Log Out</a>
+        </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="wrapper page-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" id="flashStack">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrapper">
+      <p>NutriHealth &mdash; a community nutrition &amp; health tracking project.</p>
+    </div>
+  </footer>
+
+  {% if session.get('user_id') %}
+  <!-- Ragbot: rule-based assistant, no external AI API. Can log food
+       from plain English and answer questions about today's stats. -->
+  <div class="chatbot-widget" id="chatbotWidget">
+    <button type="button" class="chatbot-toggle" id="chatbotToggle" aria-label="Open NutriHealth assistant">
+      💬
+    </button>
+    <div class="chatbot-panel" id="chatbotPanel" hidden>
+      <div class="chatbot-header">
+        <strong>NutriHealth Assistant</strong>
+        <button type="button" class="chatbot-close" id="chatbotClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="chatbot-messages" id="chatbotMessages">
+        <div class="chatbot-msg chatbot-msg-bot">
+          Hi! Tell me what you ate ("I had 2 eggs and a banana") or ask
+          about your stats. Type "help" for more.
+        </div>
+      </div>
+      <form class="chatbot-input-row" id="chatbotForm">
+        <input type="text" id="chatbotInput" placeholder="I ate 2 rotis and dal..." autocomplete="off">
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
