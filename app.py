@@ -28,10 +28,10 @@ app = Flask(__name__)
 # The secret key is used by Flask to cryptographically sign the
 # session cookie, so users can't tamper with it. In a real deployment
 # this should come from an environment variable, not be hardcoded.
-app.secret_key = "replace-this-with-a-random-secret-key-before-deploying"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "nutrition.db")
+DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "nutrition.db"))
 
 STEPS_GOAL = 10000
 WATER_GOAL = 8  # glasses
@@ -902,7 +902,10 @@ def profile():
 # Entry point
 # ==========================================================
 
+# Runs on import so tables exist under gunicorn / PythonAnywhere WSGI too.
+# Safe every time -- uses CREATE TABLE IF NOT EXISTS.
+init_db()
+
 if __name__ == "__main__":
-    init_db()  # safe to call every time -- uses CREATE TABLE IF NOT EXISTS
     print("NutriHealth running at http://127.0.0.1:5000")
     app.run(debug=True)
